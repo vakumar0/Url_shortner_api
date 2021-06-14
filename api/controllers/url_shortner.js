@@ -7,7 +7,7 @@ var moment= require('moment');
 exports.getOrginalUrl = (req, res, next ) => {
 
   console.log('function getOrginalUrl => start_____________');
-  let url = 'http://localhost:3000/?' + req.params.shortUrl;    
+  let url = 'https://vakumar-urlshortner.netlify.app/?' + req.params.shortUrl;    
   console.log('function getOrginalUrl => shortURL: ' + url);
 
   const queryString = "SELECT original_url, is_password_protected, is_expiry_enabled, expiry_time \n" +
@@ -172,7 +172,7 @@ let saveUrl =  (req, res, attempts) => {
   if(req.body.is_custom_url)
     randomUrl = req.body.custom_url;
   else 
-    randomUrl = 'http://localhost:3000/?' + generateRandomString();    
+    randomUrl = 'https://vakumar-urlshortner.netlify.app/?' + generateRandomString();    
   
     isUniqueUrl(req, res, randomUrl)
     .then( function(result){
@@ -217,11 +217,11 @@ let logInDb = (req, reqType) => {
 let validateCustomUrl = (req, res) => {
   console.log('function validateCustomUrl => start');
   console.log('function validateCustomUrl => url recieved: ' + req.body.custom_url);
-  if (validUrl.isUri(req.body.custom_url) && req.body.custom_url.includes('http://localhost:3000/?')){    
+  if (validUrl.isUri(req.body.custom_url) && req.body.custom_url.includes('https://vakumar-urlshortner.netlify.app/?')){    
     return validateUrl(req);
   } else {
     console.log('function getShortUrl => incorrect custom url');
-    return { message: "incorrect custom URL entered, please verify url starts with http://localhost:3000/?", is_success: false, openNewPage: false};
+    return { message: "incorrect custom URL entered, please verify url starts with https://vakumar-urlshortner.netlify.app/?", is_success: false, openNewPage: false};
   }
 }
 
