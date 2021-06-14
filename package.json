@@ -1,5 +1,5 @@
 {
-  "name": "url_shortner",
+  "name": "vakumar-urlshortner",
   "version": "1.0.0",
   "description": "App to shorten the urls",
   "main": "app.js",

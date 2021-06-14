@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('url_shortner:server');
+var debug = require('debug')('vakumar-urlshortner:server');
 var http = require('http');
 
 /**

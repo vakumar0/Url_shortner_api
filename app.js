@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 const app = express();
 const port = 8000;
 
+app.get('/favicon.ico', (req, res) => res.status(204));
+
 //import routes
 var urlShortnerRoutes = require('./api/routes/url_shortner');
 
@@ -18,6 +20,19 @@ app.get("/*", function (req, res) {
   res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
 })
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`)
+app.use(function(req, res, next) {
+  next(createError(404));
 });
+
+app.use(function(err, req, res, next) {
+  res.locals.message = err.message;
+  console.log(err.message)
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+
+// app.listen(port, () => {
+  // console.log(`Example app listening on port ${port}!`)
+// });
