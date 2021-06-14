@@ -4,8 +4,11 @@
   "description": "App to shorten the urls",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon ./bin/www"
   },
+  "keywords": [
+    "heroku"
+  ],
   "author": "Vaibhav Kumar",
   "license": "ISC",
   "dependencies": {
@@ -15,6 +18,7 @@
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
+    "nodemon": "^2.0.7",
     "password-validator": "^5.1.1",
     "valid-url": "^1.0.9"
   }
