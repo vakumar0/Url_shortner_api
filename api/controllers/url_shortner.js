@@ -25,10 +25,10 @@ exports.getOrginalUrl = (req, res, next ) => {
           console.log('function getOrginalUrl => is_expiry_enabled: true' );
           
           let expiry_time = rows[0].expiry_time;
-          let expiryTime = moment(expiry_time).format("YYYY-MM-DD hh:mm:ss")
+          let expiryTime = moment(expiry_time).format("YYYY-MM-DD HH:mm:ss")
           expiryTime = new Date(expiryTime);
           let current_time = new Date();
-          let currentTime = moment(current_time).format("YYYY-MM-DD hh:mm:ss");
+          let currentTime = moment(current_time).format("YYYY-MM-DD HH:mm:ss");
           currentTime = new Date(currentTime);
           let diffTime = expiryTime - currentTime ;
           
