@@ -19,36 +19,41 @@ exports.getOrginalUrl = (req, res, next ) => {
       throw err;
     } else {
       if (rows[0] != undefined) {
-        console.log('function getOrginalUrl => response data: ' + JSON.stringify(rows[0]));
-        
-        if(rows[0].is_expiry_enabled === 1) {
-          console.log('function getOrginalUrl => is_expiry_enabled: true' );
-          
-          let expiry_time = rows[0].expiry_time;
-          let expiryTime = moment(expiry_time).format("YYYY-MM-DD HH:mm:ss")
-          expiryTime = new Date(expiryTime);
-          let current_time = new Date();
-          let currentTime = moment(current_time).format("YYYY-MM-DD HH:mm:ss");
-          currentTime = new Date(currentTime);
-          let diffTime = expiryTime - currentTime ;
-          
-          console.log('function getOrginalUrl => diffTime: ' + diffTime );
-          
-          if( diffTime >= 0) { 
-            res.json({message: rows[0].original_url, is_success: true, openNewPage: true});    
-          } else {
-            res.json({message: "URL has expired", is_success: false, openNewPage: false});    
-          } 
-        } else {
-          res.json({message: rows[0].original_url, is_success: true, openNewPage: true});   
-        }
-        
+        console.log('function getOrginalUrl => response data: ' + JSON.stringify(rows[0]));        
+        handleExpiryDate(rows, res);        
       } else {
         console.log('function getOrginalUrl => no url found');
         res.json({message: "URL not found", is_success: false, openNewPage: false});      
       }      
     }
+
+    if(rows[0].is_logging_enabled)
+      logInDb(rows);
   });
+}
+
+let handleExpiryDate = (rows, res) => {
+  if(rows[0].is_expiry_enabled === 1) {
+    console.log('function getOrginalUrl => is_expiry_enabled: true' );
+    
+    let expiry_time = rows[0].expiry_time;
+    let expiryTime = moment(expiry_time).format("YYYY-MM-DD hh:mm:ss")
+    expiryTime = new Date(expiryTime);
+    let current_time = new Date();
+    let currentTime = moment(current_time).format("YYYY-MM-DD hh:mm:ss");
+    currentTime = new Date(currentTime);
+    let diffTime = expiryTime - currentTime ;
+    
+    console.log('function getOrginalUrl => diffTime: ' + diffTime );
+    
+    if( diffTime >= 0) { 
+      res.json({message: rows[0].original_url, is_success: true, openNewPage: true});    
+    } else {
+      res.json({message: "URL has expired", is_success: false, openNewPage: false});    
+    } 
+  } else {
+    res.json({message: rows[0].original_url, is_success: true, openNewPage: true});   
+  }
 }
 
 exports.getAllURLs = (req, res, next) => {    
@@ -116,36 +121,14 @@ let isUniqueUrl = (req, res, randomUrl) => {
   
 }
 
-// let isUniqueUrl = (randomUrl) => { 
-  
-//   return new Promise((resolve, reject) => {
-
-//   });
-//   const queryString = "SELECT COUNT(id) AS url_count \n" +
-//                       " FROM heroku_cb513ed70e38b31.`url_shortner.url_shortner_master` \n" +
-//                       " WHERE short_url = '"+ [randomUrl] + "';"
-  
-//   console.log(queryString);
-
-//   connection.query(queryString, (err, rows, fields) =>{
-//     if(err) {      
-//       throw err;
-//     } else {
-//       if (rows[0].url_count >= 1) return false;      
-//       return true;      
-//     }
-//   });
-
-// }
-
 let saveUrlInDb =  (req, res, randomUrl) => {
 
   return new Promise( (resolve, reject) => {
     const queryString = "INSERT INTO `url_shortner.url_shortner_master` \n" + 
-    "(short_url, original_url, is_password_protected, password, is_logging_enabled, is_expiry_enabled, expiry_time, created_by, created_on ) \n" +
-    "VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "(short_url, original_url, is_password_protected, password, is_logging_enabled, is_expiry_enabled, expiry_time, created_by, created_on, action ) \n" +
+    "VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
-    connection.query(queryString, [randomUrl, req.body.original_url, req.body.is_password_protected, req.body.password, req.body.is_logging_enabled, req.body.is_expiry_enabled, req.body.expiry_time, req.body.created_by, req.body.created_on], (err, rows, fields) =>{
+    connection.query(queryString, [randomUrl, req.body.original_url, req.body.is_password_protected, req.body.password, req.body.is_logging_enabled, req.body.is_expiry_enabled, req.body.expiry_time, req.body.created_by, req.body.created_on, 'create'], (err, rows, fields) =>{
       if(err) {      
         throw err;
       } else {                         
@@ -185,31 +168,21 @@ let saveUrl =  (req, res, attempts) => {
       //return false; 
     }); 
 
-
-  // if( isUniqueUrl(randomUrl) == false && attempts < 5) {    
-  //   console.log('function saveUrl => url generation failed attempt ' + attempts++);
-  //   saveUrl(req, res, attempts);  
-  // } else {
-  //     saveUrlInDb(req, res, randomUrl).then( result => res.json(result)) ;          
-  // }
 }
 
-let test = (req, res) => {
-  console.log('test');
-  res.json({message: "URL not found", is_success: false, openNewPage: false}); 
-}
+let logInDb = (rows) => {
 
-let logInDb = (req, reqType) => {
+  let current_time = new Date();
+  let currentTime = moment(current_time).format("YYYY-MM-DD hh:mm:ss");
+
   const queryString = "INSERT INTO `url_shortner.url_shortner_master` \n" + 
-  "(short_url, original_url, is_password_protected, password, is_logging_enabled, is_expiry_enabled, expiry_time, created_by, created_on ) \n" +
-  "VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-  connection.query(queryString, [randomUrl, req.body.original_url, req.body.is_password_protected, req.body.password, req.body.is_logging_enabled, req.body.is_expiry_enabled, req.body.expiry_time, req.body.created_by, req.body.created_on], (err, rows, fields) =>{
+  "(short_url, original_url, is_password_protected, password, is_logging_enabled, is_expiry_enabled, expiry_time, created_by, created_on, action, modified_on ) \n" +
+  "VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  connection.query(queryString, [rows[0].short_url, rows[0].original_url, rows[0].is_password_protected, rows[0].password, rows[0].is_logging_enabled, rows[0].is_expiry_enabled, rows[0].expiry_time, 'admin', rows[0].created_on, 'Fetch', currentTime], (err, rows, fields) =>{
     if(err) {      
       throw err;
     } else {           
-      console.log('function logInDb => url saved successfully');
-      if(req.body.is_logging_enabled) logInDb(req);
-      return randomUrl;
+      console.log('function logInDb => url saved successfully');     
     }
   });  
 }
